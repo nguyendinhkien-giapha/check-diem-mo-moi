@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tính điểm ăn sáng</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="AA8 Tính điểm">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{--bg:#f3f6f8;--card:#fff;--text:#000;--muted:#000;--line:#e2e8ee;--accent:#087f8c;--green:#16834a;--red:#c43d43}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+main{max-width:760px;margin:12px auto;padding:0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:12px;box-shadow:0 3px 14px #17212b08}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.brand{display:flex;align-items:center;gap:9px}.app-logo{width:48px;height:48px;object-fit:contain;border-radius:10px;background:#fff}.brand h1{line-height:1.1}.brand small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+h1{font-size:22px;margin:0}h2{font-size:16px;margin:0 0 8px}
+.pill{font-size:13px;padding:5px 8px;border-radius:999px;background:#e7f6ed;color:var(--green);font-weight:800;white-space:nowrap}
+.player-actions{display:flex;gap:8px;margin:0 0 10px}.player-actions button{flex:1}
+.names{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-bottom:10px}
+input{width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit;color:inherit;background:#fff}
+input[type=number]{text-align:right;font-variant-numeric:tabular-nums}
+.section{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+.hint{color:var(--muted);font-size:13px;margin:0 0 7px}
+.scoregrid,.totalgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.scorebox,.totalbox{border:1px solid var(--line);border-radius:9px;padding:7px}
+.scorebox label,.totalbox label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scorebox input{padding:7px 8px}
+.sumline{display:flex;justify-content:space-between;align-items:center;font-weight:800;margin:8px 0 9px;font-size:14px}
+.sumline strong{font-size:20px;font-variant-numeric:tabular-nums}
+.good{color:var(--green)}.bad{color:var(--red)}
+button{border:0;border-radius:9px;padding:9px 11px;font:inherit;font-size:15px;font-weight:750;cursor:pointer;background:#eaf0f3;color:var(--text)}
+button.primary{background:var(--accent);color:#fff;width:100%}button:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;gap:6px}.actions button{flex:1}
+.totalbox{display:flex;justify-content:space-between;align-items:center;gap:5px;padding:8px}
+.totalbox label{margin:0;color:var(--text);max-width:65%}.total{font-size:18px;font-weight:850;font-variant-numeric:tabular-nums}
+.history{width:100%;border-collapse:collapse;margin-top:6px;font-size:14px}
+.history th,.history td{padding:7px 4px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
+.history th:first-child,.history td:first-child{text-align:left}
+.history th{color:var(--muted);font-size:12px}
+.history td button{padding:4px 6px;font-size:12px}
+.history-wrap{overflow-x:auto}
+.foot{font-size:12px;color:var(--muted);margin:8px 1px 0}
+.histhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+@media(max-width:520px){main{margin:7px auto;padding:0 7px}.card{padding:9px;border-radius:11px}h1{font-size:20px}h2{font-size:15px}.names{gap:5px;margin-bottom:7px}.section{padding-top:8px;margin-top:8px}.scoregrid,.totalgrid{gap:5px}.scorebox,.totalbox{padding:6px}.scorebox input{padding:6px}.sumline{margin:6px 0}.actions button{padding:8px 6px}}
+
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield;appearance:textfield;font-size:18px}
+</style>
+</head>
+<body>
+<main><section class="card">
+<header class="app-header"><div class="brand"><div><h1>Tính điểm ăn sáng</h1></div></div><span class="pill" id="badge">Tổng = 0</span></header>
+<div class="names" id="names"></div><div class="player-actions"><button id="addPlayer" type="button">＋ Thêm người chơi</button><button id="removePlayer" type="button">－ Xóa người chơi</button></div>
+
+<section class="section">
+<h2 id="roundTitle">Ván 1</h2>
+<p class="hint">Nhập điểm cộng hoặc trừ của từng người. Tổng điểm ván phải bằng 0.</p>
+<div class="scoregrid" id="inputs"></div>
+<div class="sumline"><span>Tổng ván</span><strong id="roundSum" class="good">0</strong></div>
+<div class="actions"><button id="clearRound">Xóa điểm ván</button><button class="primary" id="save" disabled>Lưu ván</button></div>
+</section>
+
+<section class="section">
+<h2>Tổng điểm</h2><div class="totalgrid" id="totals"></div>
+<div class="sumline"><span>Tổng tất cả</span><strong id="grand" class="good">0</strong></div>
+</section>
+
+<section class="section">
+<div class="histhead"><h2 style="margin:0">Lịch sử ván</h2><button id="toggleHistory">Mở lịch sử</button></div>
+<div id="historyWrap" style="display:none"><div class="history-wrap"><table class="history"><thead><tr id="historyHead"><th>Ván</th><th></th></tr></thead><tbody id="history"></tbody></table></div>
+<div class="actions" style="margin-top:8px"><button id="undo">Xóa ván cuối</button><button id="reset">Làm mới tất cả</button></div></div>
+</section>
+<p class="foot"></p>
+</section></main>
+<footer style="max-width:760px;margin:12px auto 18px;padding:0 12px;text-align:center;color:#ff0000;font-size:13px;line-height:1.5">
+© 2026 Quyền sở hữu trí tuệ thuộc Na Đâu Các Hoàng Tử
+</footer>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+let names=['Lân','Toàn','Tâm','Kiên'],current=['','','',''],games=[];
+try{const s=JSON.parse(localStorage.getItem('score4'));if(s&&Array.isArray(s.names)&&Array.isArray(s.games)){names=s.names;games=s.games;current=Array.isArray(s.current)?s.current.map(v=>Number(v)===0?'':v):current}}catch(e){}
+const saveData=()=>{try{localStorage.setItem('score4',JSON.stringify({names,games,current}))}catch(e){}};
+const fmt=n=>n>0?'+'+n:String(n);
+const totals=()=>names.map((_,p)=>games.reduce((s,g)=>s+(Number(g[p])||0),0)+(Number(current[p])||0));
+function renderNames(){const box=$('names');box.innerHTML='';names.forEach((name,i)=>{const input=document.createElement('input');input.value=name;input.setAttribute('aria-label','Tên người chơi '+(i+1));input.placeholder='Người chơi '+(i+1);input.addEventListener('input',()=>{names[i]=input.value;renderTotals();renderHistory();renderInputs();saveData()});box.appendChild(input)});}
+function renderInputs(){const box=$('inputs');box.innerHTML='';names.forEach((name,i)=>{const wrap=document.createElement('div');wrap.className='scorebox';const label=document.createElement('label');label.textContent=name||'Người chơi '+(i+1);const input=document.createElement('input');input.type='number';input.step='1';input.value=current[i]===0||current[i]===''?'':current[i];input.setAttribute('aria-label','Điểm '+label.textContent);input.addEventListener('input',()=>{current[i]=input.value===''?'':Number(input.value)||0;renderStatus();renderTotals();saveData()});wrap.append(label,input);box.appendChild(wrap)});}
+function renderStatus(){const sum=current.reduce((a,b)=>a+(Number(b)||0),0);$('roundSum').textContent=fmt(sum);$('roundSum').className=sum===0?'good':'bad';$('save').disabled=sum!==0;$('roundTitle').textContent='Ván '+(games.length+1);$('badge').textContent='Tổng = '+fmt(totals().reduce((a,b)=>a+(Number(b)||0),0));}
+function renderTotals(){const box=$('totals');box.innerHTML='';totals().forEach((v,i)=>{const row=document.createElement('div');row.className='totalbox';const label=document.createElement('label');label.textContent=names[i]||'Người chơi '+(i+1);const val=document.createElement('span');val.className='total '+(v>=0?'good':'bad');val.textContent=fmt(v);row.append(label,val);box.appendChild(row)});const sum=totals().reduce((a,b)=>a+(Number(b)||0),0);$('grand').textContent=fmt(sum);$('grand').className=sum===0?'good':'bad';$('badge').textContent='Tổng = '+fmt(sum);}
+function renderHistory(){const head=$('historyHead');head.innerHTML='';['Ván',...names.map((n,i)=>n||'Người '+(i+1)),''].forEach(label=>{const th=document.createElement('th');th.textContent=label;head.appendChild(th)});const body=$('history');body.innerHTML='';games.forEach((g,idx)=>{const tr=document.createElement('tr');const td=document.createElement('td');td.textContent=idx+1;tr.appendChild(td);g.forEach(v=>{const cell=document.createElement('td');cell.textContent=fmt(v);cell.className=v>=0?'good':'bad';tr.appendChild(cell)});const last=document.createElement('td');const del=document.createElement('button');del.textContent='Xóa';del.addEventListener('click',()=>{const password=prompt('Nhập mật khẩu để xóa ván:');if(password===null)return;if(password!=='1205'){alert('Mật khẩu không đúng!');return;}games.splice(idx,1);renderAll();saveData()});last.appendChild(del);tr.appendChild(last);body.appendChild(tr)});}
+function renderAll(){renderNames();renderInputs();renderStatus();renderTotals();renderHistory()}
+$('removePlayer').addEventListener('click',()=>{
+ const password=prompt('Nhập mật khẩu để xóa người chơi:');
+ if(password===null)return;
+ if(password!=='1205'){alert('Mật khẩu không đúng. Không xóa người chơi.');return;}
+ if(names.length<=2){alert('Cần tối thiểu 2 người chơi.');return;}
+ const name=names[names.length-1]||('Người chơi '+names.length);
+ if(!confirm('Xóa người chơi '+name+' và dữ liệu điểm trong lịch sử?'))return;
+ names.pop(); current.pop(); games=games.map(g=>g.slice(0,-1)); renderAll(); saveData();
+});
+$('addPlayer').addEventListener('click',()=>{
+ const password=prompt('Nhập mật khẩu để thêm người chơi:');
+ if(password===null)return;
+ if(password!=='1205'){alert('Mật khẩu không đúng. Không thêm người chơi.');return;}
+ if(names.length>=12){alert('Tối đa 12 người chơi.');return;}
+ const next=names.length+1;
+ names.push('Người chơi '+next);
+ current.push('');
+ games=games.map(g=>[...g,0]);
+ renderAll();saveData();
+ const inputs=$('names').querySelectorAll('input');
+ if(inputs.length)inputs[inputs.length-1].focus();
+});
+$('save').addEventListener('click',()=>{if(current.reduce((a,b)=>a+(Number(b)||0),0)!==0)return;games.push([...current]);current=Array(names.length).fill('');renderAll();saveData()});
+$('clearRound').addEventListener('click',()=>{current=Array(names.length).fill('');renderAll();saveData()});
+$('undo').addEventListener('click',()=>{
+ if(!games.length){alert('Chưa có ván nào để xóa.');return;}
+ const password=prompt('Nhập mật khẩu để xóa ván cuối:');
+ if(password===null)return;
+ if(password!=='1205'){alert('Mật khẩu không đúng. Không xóa ván.');return;}
+ games.pop();renderAll();saveData();
+});
+$('reset').addEventListener('click',()=>{
+ const password=prompt('Nhập mật khẩu để làm mới tất cả:');
+ if(password===null)return;
+ if(password!=='1205'){alert('Mật khẩu không đúng. Không làm mới dữ liệu.');return;}
+ if(confirm('Xóa toàn bộ lịch sử và điểm hiện tại?')){
+   games=[];current=Array(names.length).fill('');renderAll();saveData();
+ }
+});
+$('toggleHistory').addEventListener('click',()=>{const wrap=$('historyWrap'),opened=wrap.style.display!=='none';wrap.style.display=opened?'none':'block';$('toggleHistory').textContent=opened?'Mở lịch sử':'Thu lịch sử'});
+renderAll();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+})();
+</script></body></html>

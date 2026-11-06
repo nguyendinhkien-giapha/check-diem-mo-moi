@@ -1,0 +1,20 @@
+TÍNH ĐIỂM ĂN SÁNG — BỘ PHẦN MỀM HOÀN CHỈNH
+
+Cài trên điện thoại:
+1. Đưa toàn bộ nội dung thư mục này lên hosting HTTPS (GitHub Pages hoặc Netlify).
+2. Mở website bằng Safari (iPhone) hoặc Chrome (Android).
+3. iPhone: Chia sẻ → Thêm vào màn hình chính.
+4. Android: Menu ⋮ → Thêm vào màn hình chính/Cài đặt ứng dụng.
+
+Chức năng:
+- 4 người chơi mặc định: Lân, Toàn, Tâm, Kiên (có thể sửa tên).
+- Nhập điểm từng ván; ô điểm để trống mặc định, không có nút tăng/giảm.
+- Chỉ lưu ván khi tổng điểm ván bằng 0.
+- Tự cộng tổng điểm, xem lịch sử, xóa điểm ván.
+- Xóa ván cuối và làm mới tất cả yêu cầu mật khẩu 1205.
+- Logo 3 quân bài được dùng làm icon ứng dụng trên màn hình điện thoại.
+- Lưu dữ liệu cục bộ trong trình duyệt thiết bị; chưa đồng bộ giữa các thiết bị.
+
+Lưu ý:
+- Không mở trực tiếp file index.html nếu muốn cài ứng dụng PWA.
+- Dữ liệu lưu trên từng thiết bị/trình duyệt, không tự đồng bộ.
