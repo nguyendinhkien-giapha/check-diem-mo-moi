@@ -231,9 +231,15 @@ async function restoreWorkspace(){
    $(infoId).textContent=raw[k]?.length?fmt(raw[k].length)+' dòng (đã tự khôi phục)':'Chưa chọn file';
   });
   if(raw.mcp?.length||raw.history?.length||raw.current?.length){
-   setStatus('Đã tự khôi phục dữ liệu đã nạp lần trước. Không cần nạp lại file. Nhấn PHÂN TÍCH & TÍNH ĐIỂM để xem kết quả.','ok');
+   if(raw.mcp?.length&&raw.history?.length&&raw.current?.length){
+    // Tự tính lại và hiển thị toàn bộ kết quả ngay khi mở lại trang.
+    analyze();
+    setStatus('Đã khôi phục đầy đủ dữ liệu và tự động tính lại kết quả từ lần trước.','ok');
+   }else{
+    setStatus('Đã khôi phục dữ liệu đã nạp lần trước. Còn thiếu file để phân tích; các file đã lưu không cần nạp lại.','ok');
+   }
   }
- }catch(err){console.warn('Không thể tự khôi phục dữ liệu:',err)}
+ }catch(err){console.warn('Không thể tự khôi phục dữ liệu:',err);setStatus('Không thể khôi phục dữ liệu đã lưu: '+(err.message||err),'err')}
 }
 function updateFileInfo(id,info,rows,file){$(id).textContent=file.name+' · '+fmt(rows.length)+' dòng';}
 async function chooseFile(id,kind,infoId){
@@ -411,6 +417,7 @@ $('analyzeBtn').addEventListener('click',()=>{try{setStatus('Đang đối chiế
 ['searchOutlet','filterGroup','filterOutcome','filterHistory3','filterHistory5','filterEmployee','filterProvince'].forEach(id=>{const el=$(id);if(el){el.addEventListener('input',()=>{resultPage=0;renderResults()});el.addEventListener('change',()=>{resultPage=0;renderResults()})}});
 $('filterManager').addEventListener('change',()=>{fillEmployeeOptions();resultPage=0;renderResults()});
 $('clearBtn').onclick=clearAll;$('backupBtn').onclick=backup;$('restoreBtn').onclick=()=>$('restoreFile').click();
+['evalMonth','threshold'].forEach(id=>$(id).addEventListener('change',()=>persistWorkspace().catch(err=>{console.warn('Không lưu được thiết lập:',err);setStatus('Không lưu được thiết lập: '+err.message,'err')})));
 $('restoreFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const p=JSON.parse(await f.text());raw=p.raw;$('evalMonth').value=p.month||'2026-11';$('threshold').value=p.threshold||2;// Phiên bản này luôn tính mọi trạng thái trừ Cancel.
 ['mcp','history','current'].forEach(k=>$(k+'Info').textContent=fmt(raw[k].length)+' dòng (từ JSON)');await persistWorkspace();setStatus('Đã khôi phục và tự lưu dữ liệu JSON. Nhấn PHÂN TÍCH & TÍNH ĐIỂM để tính lại.','ok')}catch(err){setStatus('Không đọc được JSON: '+err.message,'err')}};
 ['searchOutlet','filterGroup','filterEmployee','filterProvince'].forEach(id=>$(id).addEventListener('input',renderResults));
